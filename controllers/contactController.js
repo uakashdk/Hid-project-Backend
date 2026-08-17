@@ -1,23 +1,25 @@
 const transporter = require('../config/mailer');
 
 const sendContactEmail = async (req, res) => {
-    const { name, email, details } = req.body;
+    const { firstName, lastName, email, phone, message, consent } = req.body;
 
-    if (!name || !email || !details) {
-        return res.status(400).json({ error: 'All fields are required.' });
+    if (!firstName || !lastName || !email || !phone || !message || !consent) {
+        return res.status(400).json({ error: 'All fields and consent are required.' });
     }
 
     try {
         const mailOptions = {
-            from: `"${name}" <${process.env.SMTP_USER}>`,
+            from: `"${firstName} ${lastName}" <${process.env.SMTP_USER}>`,
             to: process.env.OWNER_EMAIL,
             replyTo: email,
-            subject: `New Inquiry from ${name}`,
-            text: `Name: ${name}\nEmail: ${email}\n\nProject Details:\n${details}`,
-            html: `<p><strong>Name:</strong> ${name}</p>
+            subject: `New Inquiry from ${firstName} ${lastName}`,
+            text: `Name: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}\n\nConsent: ${consent ? 'Yes' : 'No'}`,
+            html: `<p><strong>Name:</strong> ${firstName} ${lastName}</p>
                    <p><strong>Email:</strong> ${email}</p>
-                   <p><strong>Project Details:</strong></p>
-                   <p>${details.replace(/\n/g, '<br>')}</p>`,
+                   <p><strong>Phone:</strong> ${phone}</p>
+                   <p><strong>Message:</strong></p>
+                   <p>${message.replace(/\n/g, '<br>')}</p>
+                   <p><strong>Consent Given:</strong> ${consent ? 'Yes' : 'No'}</p>`,
         };
 
         await transporter.sendMail(mailOptions);
